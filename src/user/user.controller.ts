@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 @Controller('user')
 export class UserController {
@@ -17,7 +17,7 @@ export class UserController {
     }
 
     @Post()
-    create() {
-        return 'This route is for create a user'
+    create(@Body() body:any) {
+        return body;
     }
 }
