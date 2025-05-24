@@ -1,10 +1,14 @@
+import { CommentService } from './../comment/comment.service';
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUserDto';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService : UserService){}
+    constructor(
+        private readonly userService : UserService, 
+        private readonly commentService: CommentService
+    ) {}
 
     @Get('all')
     findAll() {
@@ -19,5 +23,10 @@ export class UserController {
     @Post()
     create(@Body() body: CreateUserDto) {
         return this.userService.createUser(body);
+    }
+
+    @Get(':id/comment')
+    getCommentByUserId(@Param('id') id:string) {
+        return this.commentService.findUserComments(id);
     }
 }
