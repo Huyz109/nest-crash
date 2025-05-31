@@ -1,6 +1,6 @@
 import { CommentService } from './../comment/comment.service';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './dto/createUserDto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -16,7 +16,7 @@ export class UserController {
     };
 
     @Get(':id')
-    findUserById(@Param("id") id:string) {
+    findUserById(@Param("id") id: number) {
         return this.userService.findOneById(id);
     }
 
@@ -28,5 +28,10 @@ export class UserController {
     @Get(':id/comment')
     getCommentByUserId(@Param('id') id:string) {
         return this.commentService.findUserComments(id);
+    }
+
+    @Put(':id')
+    updateUser(@Param('id') id:number, @Body() body: UpdateUserDto) {
+        return this.userService.updateUser(id, body);
     }
 }
