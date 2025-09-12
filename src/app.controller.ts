@@ -1,6 +1,6 @@
 import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
-import { TimeInterceptor } from './time.interceptor';
+import { TimeInterceptor } from '../test/time.interceptor';
 
 @Controller()
 @UseInterceptors(TimeInterceptor)

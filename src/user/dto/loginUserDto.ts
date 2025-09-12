@@ -2,11 +2,7 @@ import { PartialType } from "@nestjs/mapped-types";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
 
-export class CreateUserDto {
-    @ApiProperty()
-    @IsString()
-    name: string;
-
+export class LoginDto {
     @ApiProperty()
     @IsEmail()
     @IsNotEmpty({ message: "Email not empty"})
@@ -18,23 +14,3 @@ export class CreateUserDto {
     @MinLength(6, { message: "Password at least 6 characters" })
     password: string;
 }
-
-export class CreateUserResponseDto {
-    @ApiProperty()
-    @IsString()
-    id: string;
-
-    @ApiProperty()
-    @IsString()
-    name: string;
-    
-    @ApiProperty()
-    @IsEmail()
-    email: string;
-
-    @ApiProperty()
-    @IsString()
-    password: string;
-}
-
-export class UpdateUserDto extends PartialType(CreateUserDto){};
