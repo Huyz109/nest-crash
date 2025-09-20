@@ -25,6 +25,9 @@ async function bootstrap() {
     }),
   );
 
+  // Enable CORS
+  app.enableCors();
+
   // Static assets
   app.useStaticAssets(join(__dirname, '../upload'), {
     prefix: '/upload',
