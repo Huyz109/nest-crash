@@ -4,9 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { MyLogger } from './logger/my.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const logger = MyLogger.withContext('Bootstrap');
+  
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: logger,
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Nestjs Crash API')
@@ -34,5 +39,10 @@ async function bootstrap() {
   });
 
   await app.listen(8000);
+  logger.log('Application is running on: http://localhost:8000');
+  logger.log('API Documentation is available at: http://localhost:8000/api');
 }
-bootstrap();
+bootstrap().catch((error) => {
+  const logger = MyLogger.withContext('Bootstrap');
+  logger.error('Error starting application', error.stack);
+});
