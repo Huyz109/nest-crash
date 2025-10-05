@@ -1,0 +1,14 @@
+*.md
+!README.md
+node_modules/
+*.txt
+*.log
+dist/
+.vscode/
+.git/
+.gitignore
+.prettierrc
+.eslintrc
+.env
+.env.*
+.DS_Store
