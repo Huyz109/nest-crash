@@ -23,4 +23,4 @@ RUN npm install --prod
 
 EXPOSE 3000
 
-CMD ["node", "./app/main.js"]
+CMD ["pm2-runtime", "./app/main.js"]
