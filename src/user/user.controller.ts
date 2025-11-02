@@ -3,11 +3,13 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Delete,
     Get,
     Param,
     Post,
     Put,
     Res,
+    SetMetadata,
     UploadedFile,
     UploadedFiles,
     UseGuards,
@@ -29,7 +31,8 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { storage } from './oss';
 import { UploadService } from './upload.service';
 import * as path from 'path';
-import { LoginGuard } from 'src/login.guard';
+import { LoginGuard } from 'src/guards/login.guard';
+import { PermissionGuard } from 'src/guards/permission.guard';
 
 @Controller('user')
 export class UserController {
@@ -145,5 +148,16 @@ export class UserController {
     @Put(':id')
     updateUser(@Param('id') id: number, @Body() body: UpdateUserDto) {
         return this.userService.updateUser(id, body);
+    }
+
+    @ApiOperation({ summary: 'Delete user' })
+    @ApiOkResponse({
+        description: 'User deleted successfully',
+    })
+    @UseGuards(LoginGuard, PermissionGuard)
+    @Delete(':id')
+    @SetMetadata('permissions', ['DELETE_USER'])
+    deleteUser(@Param('id') id: number) {
+        return this.userService.deleteUser(id);
     }
 }

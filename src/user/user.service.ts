@@ -81,4 +81,23 @@ export class UserService {
     async updateUser(id: number, updateUserDto: UpdateUserDto) {
         return await this.userRepo.update(id, updateUserDto);
     }
+
+    async deleteUser(id: number) {
+        return await this.userRepo.delete(id);
+    }
+
+    async getUserPermissionsByEmail(email: string) {
+        const user = await this.userRepo.findOne({
+            where: { email },
+            relations: {
+                permissions: true,
+            },
+        });
+
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+
+        return user;
+    }
 }

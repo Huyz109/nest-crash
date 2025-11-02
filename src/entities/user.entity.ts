@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { Comment } from "./comment.entity";
+import { Permission } from "./permission.entity";
 
 @Entity()
 export class User {
@@ -18,6 +19,18 @@ export class User {
 
     @OneToMany((type) => Comment, (comment) => comment.user)
     comments: Comment[];
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', comment: 'Creation time' })
+    createdAt: Date;
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP', comment: 'Last update time' })
+    updatedAt: Date;
+
+    @ManyToMany(() => Permission)
+    @JoinTable({
+        name: 'user_permissions',
+    })
+    permissions: Permission[];
 
     @BeforeInsert()
     async hasPassword() {
