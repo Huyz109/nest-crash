@@ -1,15 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './dto/createUserDto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { LoginDto } from './dto/loginUserDto';
+import { createHash } from 'crypto';
+import { JwtService } from '@nestjs/jwt';
+import { stat } from 'fs';
+
+function md5(input: string): string {
+    const hash = createHash('md5');
+    hash.update(input);
+    return hash.digest('hex');
+}
 
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectRepository(User) private readonly userRepo: Repository<User>,
-    ) { }
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>;
+
+    @Inject(JwtService)
+    private readonly jwtService: JwtService;
 
     async findOneById(id: number) {
         return await this.userRepo.findOne({
@@ -19,25 +30,52 @@ export class UserService {
         });
     }
 
-    async createUser(createUserDto: CreateUserDto) {
-        const user = await this.userRepo.create(createUserDto);
-        return this.userRepo.save(user);
-    }
-
-    async login(loginDto: LoginDto) {
-        const user = await this.userRepo.findOne({
+    async createUser(user: CreateUserDto) {
+        const existingUser = await this.userRepo.findOne({
             where: {
-                email: loginDto.email,
+                email: user.email,
             },
         });
-        if (!user) throw new BadRequestException("User not found");
-        
+        if (existingUser) {
+            throw new BadRequestException("User with this email already exists");
+        }
+
+        const newUser = new User();
+        newUser.email = user.email;
+        newUser.password = md5(user.password);
+        newUser.name = user.name;
+
+        try {
+            return await this.userRepo.save(newUser);
+        } catch (error) {
+            throw new BadRequestException("Failed to create user");
+        }
+    }
+
+    async login(user: LoginDto) {
+        const existingUser = await this.userRepo.findOne({
+            where: {
+                email: user.email,
+            },
+        });
+        if (!existingUser) throw new BadRequestException("User not found");
+
         // Check password
-        if (user.password !== loginDto.password) {
+        if (existingUser.password !== md5(user.password)) {
             throw new BadRequestException("Login failed")
         }
 
-        return user;
+        // Generate JWT token
+        const payload = { email: existingUser.email, id: existingUser.id, iat: Math.floor(Date.now() / 1000) };
+        const token = this.jwtService.sign(payload);
+
+        return {
+            status: 'success',
+            data: {
+                user: existingUser,
+                token: token,
+            },
+        };
     }
 
     async updateUser(id: number, updateUserDto: UpdateUserDto) {

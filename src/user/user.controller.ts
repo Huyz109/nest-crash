@@ -10,6 +10,7 @@ import {
     Res,
     UploadedFile,
     UploadedFiles,
+    UseGuards,
     UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -28,6 +29,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { storage } from './oss';
 import { UploadService } from './upload.service';
 import * as path from 'path';
+import { LoginGuard } from 'src/login.guard';
 
 @Controller('user')
 export class UserController {
@@ -120,6 +122,7 @@ export class UserController {
 
     @ApiOperation({ summary: 'Get user information by id' })
     @ApiOkResponse()
+    @UseGuards(LoginGuard)
     @Get(':id')
     findUserById(@Param('id') id: number) {
         return this.userService.findOneById(id);
@@ -127,6 +130,7 @@ export class UserController {
 
     @ApiOperation({ summary: 'Get comment by user id' })
     @ApiOkResponse()
+    @UseGuards(LoginGuard)
     @Get(':id/comment')
     getCommentByUserId(@Param('id') id: string) {
         return this.commentService.findUserComments(id);
@@ -137,6 +141,7 @@ export class UserController {
         description: 'User updated successfully',
         type: CreateUserResponseDto,
     })
+    @UseGuards(LoginGuard)
     @Put(':id')
     updateUser(@Param('id') id: number, @Body() body: UpdateUserDto) {
         return this.userService.updateUser(id, body);
