@@ -33,8 +33,10 @@ import { UploadService } from './upload.service';
 import * as path from 'path';
 import { LoginGuard } from 'src/guards/login.guard';
 import { PermissionGuard } from 'src/guards/permission.guard';
+import { PermitAll } from 'src/common/custom-decorator';
 
 @Controller('user')
+@PermitAll()
 export class UserController {
     constructor(
         private readonly userService: UserService,

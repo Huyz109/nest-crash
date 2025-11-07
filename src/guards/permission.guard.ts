@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -14,33 +13,26 @@ export class PermissionGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
-
-    const userContext = context.switchToHttp().getRequest().user;
+    const userContext = context.switchToHttp().getRequest();
 
     if (!userContext) {
-      throw new UnauthorizedException('User not found in request');
+      return true;
     }
+    const user = userContext.user;
 
-    const existingUser = await this.userService.getUserPermissionsByEmail(userContext.email);
-
-    if (!existingUser) {
-      throw new UnauthorizedException('User doesn\'t have permissions');
-    }
-
-    if (!existingUser.permissions || existingUser.permissions.length === 0) {
+    const userRole = await this.userService.getRolesByUserId(user.id);
+    if (!userRole || userRole.length === 0) {
       throw new UnauthorizedException('User has no permissions');
     }
 
-    const requiredPermissions = this.reflector.get<string[]>('permissions', context.getHandler()) || [];
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>('requiredPermissions', [context.getHandler(), context.getClass()]);
 
-    if (!requiredPermissions || requiredPermissions.length === 0) {
-      throw new UnauthorizedException('No permissions required for this route');
-    }
+    const hasPermission = userRole.some(role => 
+      role.permissions && role.permissions.some(permission => 
+        requiredPermissions.includes(permission.name)
+      )
+    );
 
-    if (!existingUser.permissions.some(permission => requiredPermissions.includes(permission.name))) {
-      throw new UnauthorizedException('User doesn\'t have required permissions');
-    }
-
-    return true;
+    return hasPermission;
   }
 }

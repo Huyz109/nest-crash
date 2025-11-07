@@ -86,18 +86,11 @@ export class UserService {
         return await this.userRepo.delete(id);
     }
 
-    async getUserPermissionsByEmail(email: string) {
+    async getRolesByUserId(id: number) {
         const user = await this.userRepo.findOne({
-            where: { email },
-            relations: {
-                permissions: true,
-            },
+            where: { id },
+            relations: ['roles'],
         });
-
-        if (!user) {
-            throw new BadRequestException('User not found');
-        }
-
-        return user;
+        return user?.roles || [];
     }
 }

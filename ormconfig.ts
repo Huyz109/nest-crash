@@ -1,5 +1,6 @@
 import { Comment } from "src/entities/comment.entity";
 import { Permission } from "src/entities/permission.entity";
+import { Role } from "src/entities/role.entity";
 import { Topic } from "src/entities/topic.entity";
 import { User } from "src/entities/user.entity";
 import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
@@ -11,7 +12,7 @@ const config: PostgresConnectionOptions = {
     port: 5432,
     username: 'postgres',
     password: 'postgres',
-    entities: [User, Topic, Comment, Permission],
+    entities: [User, Topic, Comment, Permission, Role],
     synchronize: true
 }
 
